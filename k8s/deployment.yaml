@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: addressbook-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: addressbook
+  template:
+    metadata:
+      labels:
+        app: addressbook
+    spec:
+      containers:
+        - name: addressbook
+          image: rickyaut/springboot-addressbook:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: h2-data
+              mountPath: /data   # same as in datasource URL
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: h2-data
+          emptyDir: {}  # ephemeral storage, use PVC for real persistence
