@@ -46,19 +46,19 @@ curl --request DELETE \
 
 # Build Docker image
 ```
-docker build -t springboot-addressbook .
+docker build -t springboot-addressbook:1.0 .
 ```
 
 
 # Run container
 ```
-docker run -p 8080:8080 springboot-addressbook
+docker run -p 8080:8080 springboot-addressbook:1.0
 ```
 
 # Push to dockerhub
 ```
-docker tag springboot-addressbook:latest rickyaut/springboot-addressbook:latest
-docker push rickyaut/springboot-addressbook:latest
+docker tag springboot-addressbook:1.0 rickyaut/springboot-addressbook:1.0
+docker push rickyaut/springboot-addressbook:1.0
 ```
 
 # Kubernetes Deployment
