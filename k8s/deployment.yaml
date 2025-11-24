@@ -14,27 +14,35 @@ spec:
     spec:
       containers:
         - name: addressbook
-          image: rickyaut/springboot-addressbook:latest
+          image: rickyaut/springboot-addressbook:1.1
           ports:
             - containerPort: 8080
-          volumeMounts:
-            - name: h2-data
-              mountPath: /data   # same as in datasource URL
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-service:5432/addressbook"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "admin"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "password"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: "org.postgresql.Driver"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: "org.hibernate.dialect.PostgreSQLDialect"
           livenessProbe:
             httpGet:
               path: /actuator/health
               port: 8080
-            initialDelaySeconds: 20
-            periodSeconds: 15
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-      volumes:
-        - name: h2-data
-          emptyDir: {}  # ephemeral storage, use PVC for real persistence
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 10
