@@ -13,6 +13,9 @@ RUN mvn clean package spring-boot:repackage
 # ===== Runtime Stage =====
 FROM amazoncorretto:17-alpine
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 WORKDIR /app
 
 # Copy only the built JAR file
