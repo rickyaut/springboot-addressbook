@@ -52,7 +52,7 @@ docker build -t springboot-addressbook:1.1 .
 
 # Run container
 ```
-docker run -p 8080:8080 springboot-addressbook:1.0
+docker run -p 8080:8080 springboot-addressbook:1.1
 docker run -p 8080:8080 -e SPRING_FLYWAY_ENABLED=false springboot-addressbook:1.1
 ```
 
