@@ -7,9 +7,13 @@ mvn spotless:check
 mvn spotless:apply
 ```
 
-# Access swagger ui:
+# Access swagger ui
 ```
 http://localhost:8080/swagger-ui/index.html
+```
+# UML Diagram
+```
+https://rickyaut.atlassian.net/wiki/spaces/springboot/pages/393217/UML+Diagrams
 ```
 
 # Access the H2 Console
@@ -52,7 +56,7 @@ docker build -t springboot-addressbook:1.1 .
 
 # Run container
 ```
-docker run -p 8080:8080 springboot-addressbook:1.0
+docker run -p 8080:8080 springboot-addressbook:1.1
 docker run -p 8080:8080 -e SPRING_FLYWAY_ENABLED=false springboot-addressbook:1.1
 ```
 
