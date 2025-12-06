@@ -60,13 +60,18 @@ curl --request POST \
   --data '{"query":"mutation {\n  createAddress(userId: 2, input: {\n    name: \"John Doe2\"\n    phone: \"123456789\"\n    email: \"john2@example.com\"\n    street: \"Main St\"\n  }) {\n    id\n    name\n  }\n}"}'
 ```
 
-
 * curl command to send graphql query by user request
 ```
 curl --request POST \
   --url http://localhost:8080/graphql \
   --header 'content-type: application/json' \
   --data '{"query":"query {\n  addressesByUser(userId: 2) {\n    id\n    name\n    email\n  }\n}"}'
+```
+
+* curl command to search by full text(Lucene)
+```
+curl --request GET \
+  --url 'http://localhost:8080/api/addresses/search?q=Melborn'
 ```
 
 # Build Docker image

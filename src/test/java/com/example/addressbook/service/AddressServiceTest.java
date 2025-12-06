@@ -21,11 +21,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationEventPublisher;
 
 public class AddressServiceTest {
   @Mock private AddressEntryRepository addressRepo;
 
   @Mock private AppUserRepository appUserRepo;
+
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   @InjectMocks private AddressService service;
 

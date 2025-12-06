@@ -8,7 +8,10 @@ import com.example.addressbook.repository.AddressEntryRepository;
 import com.example.addressbook.repository.AppUserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import com.example.addressbook.event.AddressCreatedEvent;
+import com.example.addressbook.event.AddressDeletedEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +19,7 @@ public class AddressService {
   private final AddressEntryRepository addressRepo;
   private final AppUserRepository appUserRepo;
   private final AddressMapper mapper = new AddressMapper();
+  private final ApplicationEventPublisher eventPublisher;
 
   public List<AddressEntry> listForUser(Long userId) {
     return addressRepo.findByUserId(userId);
@@ -29,14 +33,21 @@ public class AddressService {
     AddressEntry entry = mapper.toEntity(dto);
     entry.setUser(user);
 
-    return addressRepo.save(entry);
+    AddressEntry saved = addressRepo.save(entry);
+    eventPublisher.publishEvent(new AddressCreatedEvent(saved));
+    return saved;
   }
 
   public void delete(Long id) {
     addressRepo.deleteById(id);
+    eventPublisher.publishEvent(new AddressDeletedEvent(id));
   }
 
   public List<AddressEntry> listAll() {
     return addressRepo.findAll();
+  }
+
+  public AddressEntry findById(Long id) {
+    return addressRepo.findById(id).orElse(null);
   }
 }
