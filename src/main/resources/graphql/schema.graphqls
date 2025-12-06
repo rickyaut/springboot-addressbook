@@ -1,0 +1,30 @@
+type Query {
+    addresses: [AddressEntry]
+    addressesByUser(userId: ID!): [AddressEntry]
+}
+
+type Mutation {
+    createAddress(userId: ID!, input: AddressInput!): AddressEntry
+    deleteAddress(id: ID!): Boolean
+}
+
+type AddressEntry {
+    id: ID!
+    name: String
+    phone: String
+    email: String
+    street: String
+    user: AppUser
+}
+
+type AppUser {
+    id: ID!
+    username: String
+}
+
+input AddressInput {
+    name: String!
+    phone: String!
+    email: String!
+    street: String!
+}

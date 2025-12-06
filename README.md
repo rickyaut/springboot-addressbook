@@ -44,6 +44,31 @@ curl --request DELETE \
   --url http://localhost:8080/api/users/1/addresses/1
 ```
 
+* curl command to send graphql query request
+```
+curl --request POST \
+  --url http://localhost:8080/graphql \
+  --header 'content-type: application/json' \
+  --data '{"query":"query {\n  addresses {\n    id\n    name\n    email\n  }\n}"}'
+```
+
+* curl command to send graphql create request
+```
+curl --request POST \
+  --url http://localhost:8080/graphql \
+  --header 'content-type: application/json' \
+  --data '{"query":"mutation {\n  createAddress(userId: 2, input: {\n    name: \"John Doe2\"\n    phone: \"123456789\"\n    email: \"john2@example.com\"\n    street: \"Main St\"\n  }) {\n    id\n    name\n  }\n}"}'
+```
+
+
+* curl command to send graphql query by user request
+```
+curl --request POST \
+  --url http://localhost:8080/graphql \
+  --header 'content-type: application/json' \
+  --data '{"query":"query {\n  addressesByUser(userId: 2) {\n    id\n    name\n    email\n  }\n}"}'
+```
+
 # Build Docker image
 ```
 docker build -t springboot-addressbook:1.0 .
