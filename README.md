@@ -76,6 +76,11 @@ minikube delete --all --purge
 pkill -f "kubectl port-forward"
 kubectl port-forward svc/addressbook-service 8080:80
 
+kubectl apply -f k8s/kafka-deployment.yaml
+kubectl apply -f k8s/kafka-service.yaml
+kubectl apply -f k8s/postgres-pvc.yaml
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/postgres-service.yaml
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 kubectl get pods

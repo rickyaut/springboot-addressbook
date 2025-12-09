@@ -1,6 +1,8 @@
 package com.example.addressbook.service;
 
 import com.example.addressbook.dto.AddressRequestDTO;
+import com.example.addressbook.event.AddressEvent;
+import com.example.addressbook.event.AddressEventProducer;
 import com.example.addressbook.mapper.AddressMapper;
 import com.example.addressbook.model.AddressEntry;
 import com.example.addressbook.model.AppUser;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class AddressService {
   private final AddressEntryRepository addressRepo;
   private final AppUserRepository appUserRepo;
+  private final AddressEventProducer eventProducer;
   private final AddressMapper mapper = new AddressMapper();
 
   public List<AddressEntry> listForUser(Long userId) {
@@ -29,11 +32,18 @@ public class AddressService {
     AddressEntry entry = mapper.toEntity(dto);
     entry.setUser(user);
 
-    return addressRepo.save(entry);
+    AddressEntry saved = addressRepo.save(entry);
+    eventProducer.sendEvent(AddressEvent.created(saved.getId(), userId));
+    return saved;
   }
 
   public void delete(Long id) {
+    AddressEntry entry =
+        addressRepo
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Address not found"));
     addressRepo.deleteById(id);
+    eventProducer.sendEvent(AddressEvent.deleted(id, entry.getUser().getId()));
   }
 
   public List<AddressEntry> listAll() {

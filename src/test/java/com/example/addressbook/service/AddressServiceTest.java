@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.addressbook.event.AddressEventProducer;
 import com.example.addressbook.mapper.AddressMapper;
 import com.example.addressbook.model.AddressEntry;
 import com.example.addressbook.model.AppUser;
@@ -26,6 +27,8 @@ public class AddressServiceTest {
   @Mock private AddressEntryRepository addressRepo;
 
   @Mock private AppUserRepository appUserRepo;
+
+  @Mock private AddressEventProducer eventProducer;
 
   @InjectMocks private AddressService service;
 
@@ -72,6 +75,7 @@ public class AddressServiceTest {
 
   @Test
   void testDelete() {
+    when(addressRepo.findById(1L)).thenReturn(Optional.of(entry1));
     doNothing().when(addressRepo).deleteById(1L);
     service.delete(1L);
     verify(addressRepo, times(1)).deleteById(1L);

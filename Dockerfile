@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy the entire project
 COPY . .
 
-# Build the Spring Boot application
-RUN mvn clean package spring-boot:repackage
+# Build the Spring Boot application (skip integration tests that need Docker)
+RUN mvn clean package spring-boot:repackage -Dtest='!**/*IntegrationTest' 
 
 
 # ===== Runtime Stage =====
