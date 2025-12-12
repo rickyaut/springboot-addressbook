@@ -15,38 +15,37 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AddressController.class)
 public class AddressControllerTest {
-  @Autowired private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-  @MockBean private AddressService service;
+    @MockitoBean private AddressService service;
 
-  private AddressEntry entry1;
-  private AddressEntry entry2;
+    private AddressEntry entry1;
+    private AddressEntry entry2;
 
-  @BeforeEach
-  void setUp() {
-    entry1 = new AddressEntry();
-    entry1.setId(1L);
-    entry1.setName("Alice");
+    @BeforeEach
+    void setUp() {
+        entry1 = new AddressEntry();
+        entry1.setId(1L);
+        entry1.setName("Alice");
 
-    entry2 = new AddressEntry();
-    entry2.setId(2L);
-    entry2.setName("Bob");
-  }
+        entry2 = new AddressEntry();
+        entry2.setId(2L);
+        entry2.setName("Bob");
+    }
 
-  @Test
-  void testGetUserAddresses() throws Exception {
-    List<AddressEntry> all = Arrays.asList(entry1, entry2);
-    when(service.listForUser(Mockito.anyLong())).thenReturn(all);
+    @Test
+    void testGetUserAddresses() throws Exception {
+        List<AddressEntry> all = Arrays.asList(entry1, entry2);
+        when(service.listForUser(Mockito.anyLong())).thenReturn(all);
 
-    mockMvc
-        .perform(get("/api/users/1/addresses"))
-        .andExpect(status().isOk())
-        .andExpect(content().string(containsString("Alice")))
-        .andExpect(content().string(containsString("Bob")));
-  }
+        mockMvc.perform(get("/api/users/1/addresses"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Alice")))
+                .andExpect(content().string(containsString("Bob")));
+    }
 }

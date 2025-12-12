@@ -12,80 +12,95 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @Testcontainers
-@EmbeddedKafka(
-    partitions = 1,
-    topics = {"address-events"},
-    brokerProperties = {"auto.create.topics.enable=true"})
 @DirtiesContext
 class KafkaConsumerIntegrationTest {
 
-  @Container
-  static PostgreSQLContainer<?> postgres =
-      new PostgreSQLContainer<>("postgres:17")
-          .withDatabaseName("testdb")
-          .withUsername("test")
-          .withPassword("test");
+    @Container
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:17")
+                    .withDatabaseName("testdb")
+                    .withUsername("test")
+                    .withPassword("test");
 
-  @DynamicPropertySource
-  static void configureProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", postgres::getJdbcUrl);
-    registry.add("spring.datasource.username", postgres::getUsername);
-    registry.add("spring.datasource.password", postgres::getPassword);
-    registry.add("spring.flyway.enabled", () -> "false");
-    registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    registry.add("spring.kafka.producer.key-serializer", () -> "org.apache.kafka.common.serialization.StringSerializer");
-    registry.add("spring.kafka.producer.value-serializer", () -> "org.springframework.kafka.support.serializer.JsonSerializer");
-    registry.add("spring.kafka.consumer.group-id", () -> "addressbook-group");
-    registry.add("spring.kafka.consumer.auto-offset-reset", () -> "earliest");
-    registry.add("spring.kafka.consumer.enable-auto-commit", () -> "false");
-    registry.add("spring.kafka.listener.ack-mode", () -> "manual");
-    registry.add("spring.kafka.consumer.value-deserializer", () -> "org.springframework.kafka.support.serializer.JsonDeserializer");
-    registry.add("spring.kafka.consumer.properties.spring.json.trusted.packages", () -> "*");
-    registry.add("kafka.consumer.enabled", () -> "true");
-  }
+    @Container
+    static KafkaContainer kafka =
+            new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.7.7"));
 
-  @Autowired private AddressEventProducer producer;
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.flyway.enabled", () -> "false");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add(
+                "spring.ai.openai.api-key",
+                () -> System.getenv().getOrDefault("OPENAI_API_KEY", "test-key"));
+        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        registry.add(
+                "spring.kafka.producer.key-serializer",
+                () -> "org.apache.kafka.common.serialization.StringSerializer");
+        registry.add(
+                "spring.kafka.producer.value-serializer",
+                () -> "org.springframework.kafka.support.serializer.JsonSerializer");
+        registry.add("spring.kafka.consumer.group-id", () -> "addressbook-group");
+        registry.add("spring.kafka.consumer.auto-offset-reset", () -> "earliest");
+        registry.add("spring.kafka.consumer.enable-auto-commit", () -> "false");
+        registry.add("spring.kafka.listener.ack-mode", () -> "manual");
+        registry.add(
+                "spring.kafka.consumer.value-deserializer",
+                () -> "org.springframework.kafka.support.serializer.JsonDeserializer");
+        registry.add("spring.kafka.consumer.properties.spring.json.trusted.packages", () -> "*");
+        registry.add("kafka.consumer.enabled", () -> "true");
+    }
 
-  @Autowired private AddressEventConsumer consumer;
+    @Autowired private AddressEventProducer producer;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    Thread.sleep(2000);
-  }
+    @Autowired private AddressEventConsumer consumer;
 
-  @AfterEach
-  void tearDown() {
-    consumer.getProcessedEvents().clear();
-  }
+    @BeforeEach
+    void setUp() throws Exception {
+        Thread.sleep(2000);
+    }
 
-  @Test
-  void shouldConsumeEventSuccessfully() {
-    AddressEvent event = AddressEvent.created(1L, 1L);
-    producer.sendEvent(event);
+    @AfterEach
+    void tearDown() {
+        consumer.getProcessedEvents().clear();
+    }
 
-    await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-      assertThat(consumer.getProcessedEvents()).contains(event.eventId());
-    });
-  }
+    @Test
+    void shouldConsumeEventSuccessfully() {
+        AddressEvent event = AddressEvent.created(1L, 1L);
+        producer.sendEvent(event);
 
-  @Test
-  void shouldPreventDuplicateProcessing() {
-    AddressEvent event = AddressEvent.created(2L, 1L);
-    producer.sendEvent(event);
-    producer.sendEvent(event);
+        await().atMost(Duration.ofSeconds(10))
+                .untilAsserted(
+                        () -> {
+                            assertThat(consumer.getProcessedEvents()).contains(event.eventId());
+                        });
+    }
 
-    await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-      assertThat(consumer.getProcessedEvents()).contains(event.eventId());
-    });
-  }
+    @Test
+    void shouldPreventDuplicateProcessing() {
+        AddressEvent event = AddressEvent.created(2L, 1L);
+        producer.sendEvent(event);
+        producer.sendEvent(event);
+
+        await().atMost(Duration.ofSeconds(10))
+                .untilAsserted(
+                        () -> {
+                            assertThat(consumer.getProcessedEvents()).contains(event.eventId());
+                        });
+    }
 }

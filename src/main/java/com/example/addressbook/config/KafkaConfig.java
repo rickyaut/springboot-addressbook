@@ -18,20 +18,20 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @ConditionalOnProperty(name = "kafka.enabled", havingValue = "true", matchIfMissing = true)
 public class KafkaConfig {
 
-  @Value("${spring.kafka.bootstrap-servers}")
-  private String bootstrapServers;
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
-  @Bean
-  public ProducerFactory<String, AddressEvent> producerFactory() {
-    Map<String, Object> config = new HashMap<>();
-    config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    return new DefaultKafkaProducerFactory<>(config);
-  }
+    @Bean
+    public ProducerFactory<String, AddressEvent> producerFactory() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
+    }
 
-  @Bean
-  public KafkaTemplate<String, AddressEvent> kafkaTemplate() {
-    return new KafkaTemplate<>(producerFactory());
-  }
+    @Bean
+    public KafkaTemplate<String, AddressEvent> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
 }
