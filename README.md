@@ -1,10 +1,10 @@
 # Build and run
 ```
-mvn clean package spring-boot:repackage
-java -jar target/addressbook-0.0.1-SNAPSHOT.jar
-mvn spring-boot:run
-mvn spotless:check
-mvn spotless:apply
+./gradlew clean build
+java -jar build/libs/addressbook-0.0.1-SNAPSHOT.jar
+./gradlew bootRun
+./gradlew spotlessCheck
+./gradlew spotlessApply
 ```
 
 # Access swagger ui

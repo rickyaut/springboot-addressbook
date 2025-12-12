@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 # Build the Spring Boot application (skip integration tests that need Docker)
-RUN mvn clean package spring-boot:repackage -Dtest='!**/*IntegrationTest' 
+RUN ./gradlew clean build -x test || ./gradlew clean build --tests '*' --tests '!**/*IntegrationTest' 
 
 
 # ===== Runtime Stage =====
@@ -16,7 +16,7 @@ FROM amazoncorretto:17-alpine
 WORKDIR /app
 
 # Copy only the built JAR file
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 # Expose Spring Boot port
 EXPOSE 8080
